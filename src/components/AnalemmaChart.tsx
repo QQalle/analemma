@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { calculateAnalemmaPoints, SolarPosition } from '@/utils/solarCalculations';
 
@@ -33,7 +33,7 @@ export default function AnalemmaChart({
   const hoursDataRef = useRef<Record<string, HourData>>({});
 
   // Function to update canvas size and redraw
-  const updateCanvas = () => {
+  const updateCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
@@ -203,7 +203,7 @@ export default function AnalemmaChart({
         }
       }
     });
-  };
+  }, [latitude, longitude, selectedTime, isDark]);
 
   // Handle canvas click
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {

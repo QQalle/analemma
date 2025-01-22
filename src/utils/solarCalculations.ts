@@ -7,16 +7,6 @@ export interface SolarPosition {
   altitude: number;  // Höjd (height above horizon)
 }
 
-// Convert degrees to radians
-function toRadians(degrees: number): number {
-  return degrees * Math.PI / 180;
-}
-
-// Convert radians to degrees
-function toDegrees(radians: number): number {
-  return radians * 180 / Math.PI;
-}
-
 function calculateSolarDeclination(dayOfYear: number): number {
   // Simpler formula for solar declination
   const d = dayOfYear;

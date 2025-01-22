@@ -160,7 +160,7 @@ export default function Home() {
                 </div>
               </div>
               <p className="text-lg text-neutral-600 dark:text-neutral-400">
-                Visualize the sun's position throughout the year
+                Visualize the sun&apos;s position throughout the year
               </p>
             </div>
 
