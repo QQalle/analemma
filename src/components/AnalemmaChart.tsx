@@ -62,8 +62,15 @@ export default function AnalemmaChart({
     const chartWidth = width - 2 * margin;
     const chartHeight = height - 2 * margin;
 
+    // Store chart dimensions for calculations
+    const chartDimensions = {
+      width: chartWidth,
+      height: chartHeight,
+      margin: margin
+    };
+
     // Move to bottom-left corner of chart area
-    ctx.translate(margin, height - margin);
+    ctx.translate(chartDimensions.margin, height - chartDimensions.margin);
 
     // Calculate max altitude from all points for y-axis scaling
     let maxAltitude = 60; // default minimum
@@ -83,14 +90,14 @@ export default function AnalemmaChart({
 
     // Draw horizontal grid lines (altitude)
     for (let alt = 0; alt <= maxAltitude; alt += 10) {
-      const y = -(alt / maxAltitude) * chartHeight;
+      const y = -(alt / maxAltitude) * chartDimensions.height;
       ctx.moveTo(0, y);
-      ctx.lineTo(chartWidth, y);
+      ctx.lineTo(chartDimensions.width, y);
       
       // Add altitude labels
       ctx.save();
       ctx.fillStyle = isDark ? '#a3a3a3' : '#737373';
-      ctx.font = `${Math.max(10, Math.min(12, chartWidth / 60))}px Inter`;
+      ctx.font = `${Math.max(10, Math.min(12, chartDimensions.width / 60))}px Inter`;
       ctx.textAlign = 'right';
       ctx.fillText(`${alt}°`, -5, y + 4);
       ctx.restore();
@@ -98,15 +105,15 @@ export default function AnalemmaChart({
 
     // Draw vertical grid lines (azimuth)
     for (let az = 0; az <= 360; az += 30) {
-      const x = (az / 360) * chartWidth;
+      const x = (az / 360) * chartDimensions.width;
       ctx.moveTo(x, 0);
-      ctx.lineTo(x, -chartHeight);
+      ctx.lineTo(x, -chartDimensions.height);
       
       // Add azimuth labels
       if (az % 90 === 0) {
         ctx.save();
         ctx.fillStyle = isDark ? '#a3a3a3' : '#737373';
-        ctx.font = `${Math.max(10, Math.min(12, chartWidth / 60))}px Inter`;
+        ctx.font = `${Math.max(10, Math.min(12, chartDimensions.width / 60))}px Inter`;
         ctx.textAlign = 'center';
         const direction = az === 0 ? 'N' : az === 90 ? 'E' : az === 180 ? 'S' : 'W';
         ctx.fillText(direction, x, 15);
@@ -127,15 +134,15 @@ export default function AnalemmaChart({
         // Store points data for click detection
         hoursDataRef.current[timeStr] = {
           points: points.map(point => ({
-            x: (point.azimuth / 360) * chartWidth,
-            y: -(point.altitude / maxAltitude) * chartHeight
+            x: (point.azimuth / 360) * chartDimensions.width,
+            y: -(point.altitude / maxAltitude) * chartDimensions.height
           }))
         };
 
         // Draw dots for each day's position
         points.forEach(point => {
-          const x = (point.azimuth / 360) * chartWidth;
-          const y = -(point.altitude / maxAltitude) * chartHeight;
+          const x = (point.azimuth / 360) * chartDimensions.width;
+          const y = -(point.altitude / maxAltitude) * chartDimensions.height;
           
           if (timeStr === selectedTime) {
             // Add glow effect for selected time
@@ -167,8 +174,8 @@ export default function AnalemmaChart({
           const todayPoint = points[dayOfYear - 1];
           
           if (todayPoint) {
-            const x = (todayPoint.azimuth / 360) * chartWidth;
-            const y = -(todayPoint.altitude / maxAltitude) * chartHeight;
+            const x = (todayPoint.azimuth / 360) * chartDimensions.width;
+            const y = -(todayPoint.altitude / maxAltitude) * chartDimensions.height;
             
             // Outer glow
             ctx.save();
