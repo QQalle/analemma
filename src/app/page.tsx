@@ -190,9 +190,9 @@ export default function Home() {
                 className="overflow-hidden"
               >
                 <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl p-4 mb-6 shadow-sm">
-                  <h2 className="text-lg font-semibold text-black dark:text-white mb-2">About the Sun's Position</h2>
+                  <h2 className="text-lg font-semibold text-black dark:text-white mb-2">About the Sun&apos;s Position</h2>
                   <p className="text-neutral-600 dark:text-neutral-400">
-                    The graph shows the sun's position in the sky for each hour throughout the year. Click on a line to highlight that hour. 
+                    The graph shows the sun&apos;s position in the sky for each hour throughout the year. Click on a line to highlight that hour. 
                     The altitude (y-axis) shows how high the sun is in the sky, and the azimuth (x-axis) shows the direction of the sun.
                   </p>
                 </div>

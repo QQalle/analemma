@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { calculateAnalemmaPoints, SolarPosition } from '@/utils/solarCalculations';
 
@@ -245,24 +245,8 @@ export default function AnalemmaChart({
   };
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    // Initial draw
     updateCanvas();
-
-    // Set up resize observer
-    const resizeObserver = new ResizeObserver(() => {
-      updateCanvas();
-    });
-
-    resizeObserver.observe(container);
-
-    // Cleanup
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [latitude, longitude, selectedTime, isDark]);
+  }, [latitude, longitude, selectedTime, isDark, updateCanvas]);
 
   return (
     <motion.div

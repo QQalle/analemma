@@ -66,10 +66,6 @@ export default function Map({ onLocationSelect, defaultLocation, isDark = false 
     );
   }
 
-  // Monochrome map styles
-  const LIGHT_MAP_STYLE = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-  const DARK_MAP_STYLE = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
-
   return (
     <>
       <style jsx global>{`

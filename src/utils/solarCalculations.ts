@@ -3,12 +3,18 @@ const DEG_TO_RAD = Math.PI / 180;
 const RAD_TO_DEG = 180 / Math.PI;
 
 export interface SolarPosition {
-  azimuth: number;  // Azimuth (degrees)
-  altitude: number; // Altitude (degrees)
+  azimuth: number;   // Vädersträck (compass direction)
+  altitude: number;  // Höjd (height above horizon)
 }
 
-function calculateDayAngle(dayOfYear: number): number {
-  return (2 * Math.PI * (dayOfYear - 1)) / 365;
+// Convert degrees to radians
+function toRadians(degrees: number): number {
+  return degrees * Math.PI / 180;
+}
+
+// Convert radians to degrees
+function toDegrees(radians: number): number {
+  return radians * 180 / Math.PI;
 }
 
 function calculateSolarDeclination(dayOfYear: number): number {
