@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { calculateAnalemmaPoints, SolarPosition } from '@/utils/solarCalculations';
+import { calculateAnalemmaPoints } from '@/utils/solarCalculations';
 
 interface AnalemmaChartProps {
   latitude: number;
@@ -90,7 +90,7 @@ export default function AnalemmaChart({
       // Add altitude labels
       ctx.save();
       ctx.fillStyle = isDark ? '#a3a3a3' : '#737373';
-      ctx.font = `${Math.max(10, Math.min(12, width / 60))}px Inter`;
+      ctx.font = `${Math.max(10, Math.min(12, chartWidth / 60))}px Inter`;
       ctx.textAlign = 'right';
       ctx.fillText(`${alt}°`, -5, y + 4);
       ctx.restore();
@@ -106,7 +106,7 @@ export default function AnalemmaChart({
       if (az % 90 === 0) {
         ctx.save();
         ctx.fillStyle = isDark ? '#a3a3a3' : '#737373';
-        ctx.font = `${Math.max(10, Math.min(12, width / 60))}px Inter`;
+        ctx.font = `${Math.max(10, Math.min(12, chartWidth / 60))}px Inter`;
         ctx.textAlign = 'center';
         const direction = az === 0 ? 'N' : az === 90 ? 'E' : az === 180 ? 'S' : 'W';
         ctx.fillText(direction, x, 15);
