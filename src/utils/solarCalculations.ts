@@ -1,3 +1,16 @@
+// Helper functions
+function toRadians(degrees: number): number {
+  return degrees * Math.PI / 180;
+}
+
+function toDegrees(radians: number): number {
+  return radians * 180 / Math.PI;
+}
+
+function calculateDayAngle(dayOfYear: number): number {
+  return 2 * Math.PI * (dayOfYear - 1) / 365;
+}
+
 // Constants
 const DEG_TO_RAD = Math.PI / 180;
 const RAD_TO_DEG = 180 / Math.PI;
@@ -8,115 +21,95 @@ export interface SolarPosition {
 }
 
 function calculateSolarDeclination(dayOfYear: number): number {
-  // Simpler formula for solar declination
-  const d = dayOfYear;
-  return -23.45 * Math.cos((360 / 365) * (d + 10) * DEG_TO_RAD);
+  // Solar declination angle (δ) using Spencer's formula
+  const x = 2 * Math.PI * (dayOfYear - 1) / 365;
+  return 0.006918 - 0.399912 * Math.cos(x) + 0.070257 * Math.sin(x) 
+         - 0.006758 * Math.cos(2 * x) + 0.000907 * Math.sin(2 * x) 
+         - 0.002697 * Math.cos(3 * x) + 0.001480 * Math.sin(3 * x);
 }
 
 function calculateEquationOfTime(dayOfYear: number): number {
-  const b = (2 * Math.PI * (dayOfYear - 81)) / 364;
-  return 9.87 * Math.sin(2 * b) - 7.53 * Math.cos(b) - 1.5 * Math.sin(b);
+  // Equation of time using Spencer's formula (in minutes)
+  const x = 2 * Math.PI * (dayOfYear - 1) / 365;
+  return 229.18 * (0.000075 + 0.001868 * Math.cos(x) - 0.032077 * Math.sin(x) 
+                   - 0.014615 * Math.cos(2 * x) - 0.040849 * Math.sin(2 * x));
 }
 
-// Get timezone offset for a location based on longitude
-function getTimezoneOffsetFromLongitude(longitude: number): number {
-  // Each timezone is roughly 15 degrees wide (360/24)
-  // Round to nearest timezone to handle edge cases
-  const timeZone = Math.round(longitude / 15);
-  return timeZone;
-}
-
-export function calculateSolarPosition(
-  latitude: number,
-  longitude: number,
-  time: string,
-  dayOfYear: number
-): SolarPosition {
-  // Parse time string to get hours and minutes
-  const [hours, minutes] = time.split(':').map(Number);
+// Core solar position calculation function
+export function calculateSolarPosition(latitude: number, longitude: number, date: Date): SolarPosition {
+  const startOfYear = new Date(date.getFullYear(), 0, 0);
+  const dayOfYear = Math.floor((date.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24)) + 1;
   
-  // Get the timezone offset for this location
-  const locationOffset = getTimezoneOffsetFromLongitude(longitude);
-  
-  // Convert location's local time to UTC
-  const localDecimalTime = hours + minutes / 60;
-  const utcTime = localDecimalTime - locationOffset;
-
-  // Calculate solar declination
+  // Calculate solar declination (in radians)
   const declination = calculateSolarDeclination(dayOfYear);
-
-  // Calculate equation of time adjustment
+  
+  // Calculate equation of time (in minutes)
   const eot = calculateEquationOfTime(dayOfYear);
-
+  
   // Calculate true solar time
-  const longitudeCorrection = longitude * 4; // 4 minutes per degree
-  const timeCorrection = eot + longitudeCorrection;
-  const solarTime = utcTime + timeCorrection / 60;
-
-  // Calculate hour angle (15° per hour from solar noon)
+  const localHour = date.getHours() + date.getMinutes() / 60;
+  const standardMeridian = Math.floor(longitude / 15) * 15;
+  const timeCorrection = 4 * (longitude - standardMeridian) + eot; // 4 minutes per degree
+  const solarTime = localHour + timeCorrection / 60;
+  
+  // Calculate hour angle (ω)
   const hourAngle = (solarTime - 12) * 15;
-
-  // Convert latitude and hour angle to radians
-  const latRad = latitude * DEG_TO_RAD;
-  const hourAngleRad = hourAngle * DEG_TO_RAD;
-  const declinationRad = declination * DEG_TO_RAD;
-
+  
+  // Convert angles to radians
+  const latRad = toRadians(latitude);
+  const hourAngleRad = toRadians(hourAngle);
+  
   // Calculate solar altitude
   const sinAltitude = 
-    Math.sin(latRad) * Math.sin(declinationRad) +
-    Math.cos(latRad) * Math.cos(declinationRad) * Math.cos(hourAngleRad);
-  const altitude = Math.asin(sinAltitude) * RAD_TO_DEG;
-
-  // Calculate solar azimuth
-  let azimuth;
-  const cosAzimuth = 
-    (Math.sin(declinationRad) - Math.sin(latRad) * sinAltitude) /
-    (Math.cos(latRad) * Math.cos(Math.asin(sinAltitude)));
+    Math.sin(latRad) * Math.sin(declination) +
+    Math.cos(latRad) * Math.cos(declination) * Math.cos(hourAngleRad);
+  const altitude = toDegrees(Math.asin(sinAltitude));
   
-  if (hourAngle < 0) {
-    azimuth = Math.acos(cosAzimuth) * RAD_TO_DEG;
-  } else {
-    azimuth = 360 - Math.acos(cosAzimuth) * RAD_TO_DEG;
+  // If the sun is below the horizon, return negative altitude
+  if (altitude < 0) {
+    return {
+      azimuth: 0,
+      altitude: altitude
+    };
   }
-
-  // Debug logging
-  if (dayOfYear % 30 === 0) {
-    console.log(`Day ${dayOfYear}, Location Time ${time} (UTC${locationOffset >= 0 ? '+' : ''}${locationOffset}):`, {
-      declination,
-      hourAngle,
-      altitude,
-      azimuth,
-    });
+  
+  // Calculate solar azimuth
+  const cosAzimuth = (Math.sin(declination) - Math.sin(latRad) * sinAltitude) /
+                     (Math.cos(latRad) * Math.cos(Math.asin(sinAltitude)));
+  let azimuth = toDegrees(Math.acos(Math.max(-1, Math.min(1, cosAzimuth))));
+  
+  // Adjust azimuth based on hour angle
+  if (hourAngle > 0) {
+    azimuth = 360 - azimuth;
   }
-
+  
   return {
-    azimuth: (azimuth + 360) % 360,
-    altitude: Math.max(0, altitude)
+    azimuth: azimuth,
+    altitude: altitude
   };
 }
 
+// Calculate analemma points for a specific time
 export function calculateAnalemmaPoints(
   latitude: number,
   longitude: number,
   time: string
 ): SolarPosition[] {
   const points: SolarPosition[] = [];
+  const [hours, minutes] = time.split(':').map(Number);
+  const now = new Date();
+  const year = now.getFullYear();
   
   // Calculate sun position for each day of the year
   for (let dayOfYear = 1; dayOfYear <= 365; dayOfYear++) {
-    const position = calculateSolarPosition(latitude, longitude, time, dayOfYear);
+    const date = new Date(year, 0, dayOfYear);
+    date.setHours(hours, minutes, 0, 0);
+    const position = calculateSolarPosition(latitude, longitude, date);
     
     // Only add points where the sun is above the horizon
     if (position.altitude > 0) {
       points.push(position);
     }
-  }
-
-  // Debug logging
-  console.log(`Generated ${points.length} points for ${time} at ${latitude}°N, ${longitude}°E`);
-  if (points.length > 0) {
-    console.log('First point:', points[0]);
-    console.log('Last point:', points[points.length - 1]);
   }
   
   return points;

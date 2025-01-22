@@ -11,7 +11,7 @@ const MapWithNoSSR = dynamic(
   { 
     ssr: false,
     loading: () => (
-      <div className="h-full w-full flex items-center justify-center bg-white dark:bg-neutral-800">
+      <div className="h-full w-full flex items-center justify-center bg-white dark:bg-[#121212]">
         <div className="flex flex-col items-center gap-2">
           <div className="animate-spin">
             <MapPin className="w-6 h-6 text-red-600" />
@@ -29,7 +29,7 @@ const AnalemmaChart = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="h-full w-full flex items-center justify-center bg-white dark:bg-neutral-800">
+      <div className="h-full w-full flex items-center justify-center bg-white dark:bg-[#121212]">
         <div className="flex flex-col items-center gap-2">
           <div className="w-8 h-8 rounded-full border-2 border-neutral-200 dark:border-neutral-700 border-t-red-600 animate-spin" />
           <span className="text-sm text-neutral-600 dark:text-neutral-400">Calculating sun positions...</span>
@@ -53,6 +53,7 @@ export default function Home() {
   const [isClient, setIsClient] = useState(false);
   const [timezoneOffset, setTimezoneOffset] = useState('');
   const [isDark, setIsDark] = useState(false);
+  const [showTodayPath, setShowTodayPath] = useState(false);
 
   // Handle initial client-side setup
   useEffect(() => {
@@ -61,15 +62,17 @@ export default function Home() {
     // Initialize theme
     const initializeTheme = () => {
       const storedTheme = localStorage.getItem('theme');
-      if (storedTheme === 'dark') {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      
+      if (storedTheme === 'dark' || (!storedTheme && prefersDark)) {
         setIsDark(true);
         document.documentElement.classList.add('dark');
-      } else if (storedTheme === 'light') {
+      } else {
         setIsDark(false);
         document.documentElement.classList.remove('dark');
-      } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        setIsDark(true);
-        document.documentElement.classList.add('dark');
+      }
+      
+      if (!storedTheme && prefersDark) {
         localStorage.setItem('theme', 'dark');
       }
     };
@@ -113,14 +116,14 @@ export default function Home() {
   // Show loading state until client-side code is ready
   if (!isClient) {
     return (
-      <div className="min-h-screen bg-[#fafafa] dark:bg-neutral-900 flex items-center justify-center">
+      <div className="min-h-screen bg-[#fafafa] dark:bg-[#121212] flex items-center justify-center">
         <div className="w-8 h-8 rounded-full border-2 border-neutral-200 dark:border-neutral-700 border-t-red-600 animate-spin" />
       </div>
     );
   }
 
   return (
-    <main className="relative min-h-screen bg-white dark:bg-neutral-900 transition-colors duration-200">
+    <main className="relative min-h-screen transition-colors duration-200" suppressHydrationWarning>
       {/* Gradient overlay at the bottom */}
       <div className="absolute bottom-0 left-0 right-0 h-[30vh] bg-gradient-to-t from-[#ffedd5] via-[#fef3c7] to-transparent dark:from-[#1e1b4b] dark:via-[#312e81] dark:to-transparent opacity-40" />
       <div className="relative p-4 md:p-8">
@@ -166,12 +169,12 @@ export default function Home() {
 
             {/* Time and Location Display */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-              <div className="w-full sm:w-auto flex items-center gap-2 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg px-4 py-2 shadow-sm">
+              <div className="w-full sm:w-auto flex items-center gap-2 bg-white dark:bg-[#121212] border border-neutral-200 dark:border-neutral-800 rounded-lg px-4 py-2 shadow-sm">
                 <span className="text-sm text-neutral-600 dark:text-neutral-400">
                   {selectedTime} ({timezoneOffset})
                 </span>
               </div>
-              <div className="w-full sm:w-auto flex items-center gap-2 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg px-4 py-2 shadow-sm">
+              <div className="w-full sm:w-auto flex items-center gap-2 bg-white dark:bg-[#121212] border border-neutral-200 dark:border-neutral-800 rounded-lg px-4 py-2 shadow-sm">
                 <MapPin className="w-4 h-4 text-red-600 flex-shrink-0" />
                 <span className="text-sm text-neutral-600 dark:text-neutral-400">
                   {location.lat.toFixed(4)}°N, {location.lng.toFixed(4)}°E
@@ -189,7 +192,7 @@ export default function Home() {
                 exit={{ opacity: 0, height: 0 }}
                 className="overflow-hidden"
               >
-                <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl p-4 mb-6 shadow-sm">
+                <div className="bg-white dark:bg-[#121212] border border-neutral-200 dark:border-neutral-800 rounded-xl p-4 mb-6 shadow-sm">
                   <h2 className="text-lg font-semibold text-black dark:text-white mb-2">About the Sun&apos;s Position</h2>
                   <p className="text-neutral-600 dark:text-neutral-400">
                     The graph shows the sun&apos;s position in the sky for each hour throughout the year. Click on a line to highlight that hour. 
@@ -219,7 +222,7 @@ export default function Home() {
               onHoverEnd={() => setIsMapExpanded(false)}
             >
               <motion.div 
-                className="w-full h-full rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 shadow-sm"
+                className="w-full h-full rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#121212] shadow-sm"
                 animate={{
                   scale: isMapExpanded ? 1 : 0.98
                 }}
@@ -239,11 +242,55 @@ export default function Home() {
               </motion.div>
             </motion.div>
 
+            {/* Settings Panel */}
+            <motion.div
+              className="absolute top-[calc(120px+1rem)] right-4 z-50 w-[150px]"
+              initial={false}
+              animate={{
+                top: isMapExpanded ? 'calc(225px + 1rem)' : 'calc(120px + 1rem)',
+                width: isMapExpanded ? '300px' : '150px',
+              }}
+              transition={{ 
+                type: "spring",
+                stiffness: 300,
+                damping: 30
+              }}
+            >
+              <motion.div 
+                className="w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#121212] shadow-sm p-3"
+                animate={{
+                  scale: isMapExpanded ? 1 : 0.98
+                }}
+                transition={{
+                  scale: {
+                    type: "spring",
+                    stiffness: 400,
+                    damping: 25
+                  }
+                }}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <label className="text-sm text-neutral-600 dark:text-neutral-400 cursor-pointer select-none">
+                    Show today&apos;s sun path
+                  </label>
+                  <div 
+                    onClick={() => setShowTodayPath(!showTodayPath)}
+                    className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out ${showTodayPath ? 'bg-red-600' : 'bg-neutral-200 dark:bg-neutral-700'}`}
+                  >
+                    <span 
+                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${showTodayPath ? 'translate-x-4' : 'translate-x-0.5'}`}
+                      style={{ margin: '2px 0' }}
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+
             {/* Analemma Chart */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="h-[calc(100vh-16rem)] sm:h-[calc(100vh-12rem)] bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 shadow-sm overflow-hidden"
+              className="h-[calc(100vh-16rem)] sm:h-[calc(100vh-12rem)] bg-white dark:bg-[#121212] rounded-lg border border-neutral-200 dark:border-neutral-800 shadow-sm overflow-hidden"
             >
               <AnalemmaChart
                 latitude={location.lat}
@@ -251,6 +298,7 @@ export default function Home() {
                 selectedTime={selectedTime}
                 onTimeSelect={setSelectedTime}
                 isDark={isDark}
+                showTodayPath={showTodayPath}
               />
             </motion.div>
           </div>
@@ -262,9 +310,10 @@ export default function Home() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
         className="absolute bottom-6 left-0 right-0 text-center"
+        suppressHydrationWarning
       >
         <p className="text-sm text-neutral-500 dark:text-neutral-400">
-          Made with ❤️ in Sweden by Carl Liljeberg <span className="ml-1">🇸🇪</span>
+          Made with ❤️ in 🇸🇪 by Carl Liljeberg
         </p>
       </motion.div>
     </main>

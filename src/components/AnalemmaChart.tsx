@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { calculateAnalemmaPoints } from '@/utils/solarCalculations';
+import { calculateAnalemmaPoints, calculateSolarPosition } from '@/utils/solarCalculations';
 
 interface AnalemmaChartProps {
   latitude: number;
@@ -10,6 +10,7 @@ interface AnalemmaChartProps {
   selectedTime: string;
   onTimeSelect: (time: string) => void;
   isDark?: boolean;
+  showTodayPath?: boolean;
 }
 
 interface Point {
@@ -26,7 +27,8 @@ export default function AnalemmaChart({
   longitude, 
   selectedTime, 
   onTimeSelect,
-  isDark = false 
+  isDark = false,
+  showTodayPath = true
 }: AnalemmaChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -109,13 +111,13 @@ export default function AnalemmaChart({
       ctx.moveTo(x, 0);
       ctx.lineTo(x, -chartDimensions.height);
       
-      // Add azimuth labels
+      // Add azimuth labels for main compass points
       if (az % 90 === 0) {
         ctx.save();
         ctx.fillStyle = isDark ? '#a3a3a3' : '#737373';
         ctx.font = `${Math.max(10, Math.min(12, chartDimensions.width / 60))}px Inter`;
         ctx.textAlign = 'center';
-        const direction = az === 0 ? 'N' : az === 90 ? 'E' : az === 180 ? 'S' : 'W';
+        const direction = az === 0 || az === 360 ? 'N' : az === 90 ? 'E' : az === 180 ? 'S' : 'W';
         ctx.fillText(direction, x, 15);
         ctx.restore();
       }
@@ -124,6 +126,37 @@ export default function AnalemmaChart({
 
     // Reset hours data
     hoursDataRef.current = {};
+
+    // Draw today's sun path if enabled
+    if (showTodayPath) {
+      ctx.beginPath();
+      ctx.strokeStyle = isDark ? 'rgba(251, 191, 36, 0.4)' : 'rgba(251, 191, 36, 0.6)';
+      ctx.lineWidth = 2;
+
+      // Calculate sun positions for today at 15-minute intervals
+      const today = new Date();
+      const intervals = Array.from({ length: 96 }, (_, i) => i * 15); // 24 hours * 4 (15-min intervals)
+      
+      intervals.forEach((minutes, index) => {
+        const time = new Date(today);
+        time.setHours(Math.floor(minutes / 60), minutes % 60);
+        const position = calculateSolarPosition(latitude, longitude, time);
+
+        // Only draw points when sun is above horizon
+        if (position.altitude > 0) {
+          const x = (position.azimuth / 360) * chartDimensions.width;
+          const y = -(position.altitude / maxAltitude) * chartDimensions.height;
+
+          if (index === 0 || !intervals.some((_, i) => i < index && calculateSolarPosition(latitude, longitude, new Date(today.setHours(Math.floor(i * 15 / 60), (i * 15) % 60))).altitude > 0)) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        }
+      });
+
+      ctx.stroke();
+    }
 
     // Draw all hours
     hours.forEach(hour => {
@@ -141,6 +174,9 @@ export default function AnalemmaChart({
 
         // Draw dots for each day's position
         points.forEach(point => {
+          // Skip points where sun is below horizon
+          if (point.altitude <= 0) return;
+
           const x = (point.azimuth / 360) * chartDimensions.width;
           const y = -(point.altitude / maxAltitude) * chartDimensions.height;
           
@@ -173,7 +209,8 @@ export default function AnalemmaChart({
           const dayOfYear = Math.floor((today.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24));
           const todayPoint = points[dayOfYear - 1];
           
-          if (todayPoint) {
+          // Only draw today's position if sun is above horizon
+          if (todayPoint && todayPoint.altitude > 0) {
             const x = (todayPoint.azimuth / 360) * chartDimensions.width;
             const y = -(todayPoint.altitude / maxAltitude) * chartDimensions.height;
             
@@ -210,7 +247,7 @@ export default function AnalemmaChart({
         }
       }
     });
-  }, [latitude, longitude, selectedTime, isDark]);
+  }, [latitude, longitude, selectedTime, isDark, showTodayPath]);
 
   // Handle canvas click
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -257,7 +294,7 @@ export default function AnalemmaChart({
 
   useEffect(() => {
     updateCanvas();
-  }, [latitude, longitude, selectedTime, isDark, updateCanvas]);
+  }, [latitude, longitude, selectedTime, isDark, showTodayPath, updateCanvas]);
 
   return (
     <motion.div
