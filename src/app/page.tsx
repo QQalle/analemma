@@ -256,6 +256,17 @@ export default function Home() {
           </div>
         </motion.div>
       </div>
+      {/* Footer */}
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="absolute bottom-6 left-0 right-0 text-center"
+      >
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">
+          Made with ❤️ in Sweden by Carl Liljeberg <span className="ml-1">🇸🇪</span>
+        </p>
+      </motion.div>
     </main>
   );
 }
