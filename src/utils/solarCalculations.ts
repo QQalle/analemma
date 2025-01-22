@@ -7,14 +7,6 @@ function toDegrees(radians: number): number {
   return radians * 180 / Math.PI;
 }
 
-function calculateDayAngle(dayOfYear: number): number {
-  return 2 * Math.PI * (dayOfYear - 1) / 365;
-}
-
-// Constants
-const DEG_TO_RAD = Math.PI / 180;
-const RAD_TO_DEG = 180 / Math.PI;
-
 export interface SolarPosition {
   azimuth: number;   // Vädersträck (compass direction)
   altitude: number;  // Höjd (height above horizon)
