@@ -224,10 +224,14 @@ export default function AnalemmaChart({
     
     // Convert click coordinates to chart coordinates
     const margin = Math.min(rect.width, rect.height) * 0.08;
-    const chartWidth = rect.width - 2 * margin;
-    const chartHeight = rect.height - 2 * margin;
-    const chartX = x - margin;
-    const chartY = (rect.height - margin - y) - chartHeight;
+    const chartDimensions = {
+      width: rect.width - 2 * margin,
+      height: rect.height - 2 * margin,
+      margin: margin
+    };
+    
+    const chartX = x - chartDimensions.margin;
+    const chartY = (rect.height - chartDimensions.margin - y) - chartDimensions.height;
 
     // Find the closest analemma to the click
     let closestDistance = Infinity;
