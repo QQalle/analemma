@@ -198,7 +198,7 @@ export default function Home() {
                     The graph shows the sun&apos;s position in the sky for each hour throughout the year. Click on a line to highlight that hour. 
                     The altitude (y-axis) shows how high the sun is in the sky, and the azimuth (x-axis) shows the direction of the sun.
                   </p>
-                </div>
+        </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -303,7 +303,7 @@ export default function Home() {
             </motion.div>
           </div>
         </motion.div>
-      </div>
+    </div>
       {/* Footer */}
       <motion.div 
         initial={{ opacity: 0, y: 10 }}
