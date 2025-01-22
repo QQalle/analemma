@@ -165,14 +165,14 @@ export default function Home() {
             </div>
 
             {/* Time and Location Display */}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-2 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg px-4 py-2 shadow-sm">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+              <div className="w-full sm:w-auto flex items-center gap-2 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg px-4 py-2 shadow-sm">
                 <span className="text-sm text-neutral-600 dark:text-neutral-400">
                   {selectedTime} ({timezoneOffset})
                 </span>
               </div>
-              <div className="flex items-center gap-2 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg px-4 py-2 shadow-sm">
-                <MapPin className="w-4 h-4 text-red-600" />
+              <div className="w-full sm:w-auto flex items-center gap-2 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg px-4 py-2 shadow-sm">
+                <MapPin className="w-4 h-4 text-red-600 flex-shrink-0" />
                 <span className="text-sm text-neutral-600 dark:text-neutral-400">
                   {location.lat.toFixed(4)}°N, {location.lng.toFixed(4)}°E
                 </span>
@@ -207,8 +207,8 @@ export default function Home() {
               className="absolute top-4 right-4 z-50"
               initial={false}
               animate={{
-                width: isMapExpanded ? '400px' : '200px',
-                height: isMapExpanded ? '300px' : '150px',
+                width: isMapExpanded ? '300px' : '150px',
+                height: isMapExpanded ? '225px' : '120px',
               }}
               transition={{ 
                 type: "spring",
@@ -243,7 +243,7 @@ export default function Home() {
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="h-[calc(100vh-12rem)] bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 shadow-sm overflow-hidden"
+              className="h-[calc(100vh-16rem)] sm:h-[calc(100vh-12rem)] bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 shadow-sm overflow-hidden"
             >
               <AnalemmaChart
                 latitude={location.lat}
