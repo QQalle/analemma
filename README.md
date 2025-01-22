@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Analemma Visualizer
+
+A modern web application that visualizes the sun's position throughout the year using an analemma pattern. Built with Next.js, TypeScript, and Tailwind CSS.
+
+## Features
+
+- 🌍 Interactive map for location selection
+- ☀️ Real-time solar position calculations
+- 🎨 Beautiful, minimalist design with light/dark mode
+- 📱 Fully responsive layout
+- 🔍 Expandable mini-map with custom styling
+- 🎯 Click or drag to select location
+- ⌚ Time-based visualization
+- 🌐 Automatic timezone detection
+
+## Tech Stack
+
+- **Framework**: Next.js 14 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **UI Components**: shadcn/ui
+- **Icons**: Lucide Icons
+- **Animations**: Framer Motion
+- **Map**: Leaflet with custom styling
+- **Math**: Custom solar position calculations
 
 ## Getting Started
 
-First, run the development server:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/analemma-visualizer.git
+   cd analemma-visualizer
+   ```
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+2. Install dependencies:
+   ```bash
+   npm install
+   # or
+   yarn install
+   # or
+   pnpm install
+   ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. Run the development server:
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   # or
+   pnpm dev
+   ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Usage
 
-## Learn More
+- Click anywhere on the map or drag the marker to select a location
+- Hover over the mini-map to expand it
+- Toggle dark/light mode using the theme button
+- Click the info button to learn more about the visualization
+- The graph shows the sun's position (altitude and azimuth) throughout the year
+- Each line represents a different hour of the day
 
-To learn more about Next.js, take a look at the following resources:
+## Solar Calculations
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The analemma pattern is calculated using:
+- Solar declination
+- Equation of time
+- Local solar time
+- Observer's latitude and longitude
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The calculations take into account:
+- Earth's axial tilt
+- Orbital eccentricity
+- Local time zone based on longitude
 
-## Deploy on Vercel
+## Contributing
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
